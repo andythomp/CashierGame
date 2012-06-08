@@ -1,0 +1,10 @@
+[
+  {
+    "type": "square",
+    "count": 5
+  },
+  {
+    "type": "circle",
+    "count": 6
+  }
+]

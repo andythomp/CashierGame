@@ -1,0 +1,382 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Cashier Game</title>
+	<script language="javascript"  src="easel.js"></script>
+	<script language="javascript"  src="jquery.js"></script>
+	<script language="javascript"  src="SoundJS.js"></script>
+	<script language="javascript"  src="preload.js"></script>
+	<script language="javascript"  src="FlashPlugin.js"></script>
+	<script language="javascript"  src="Ball.js"></script>
+	<script language="javascript"  src="Rect.js"></script>
+	<script type="text/javascript">
+
+        var canvas;
+        var stage;
+        var img;
+		var items;
+		var images;
+		var manifest;
+		var conveyorMoving;
+		var selectedItem;
+		var offset;
+		var loader;
+		var grid1;
+		var grid2;
+	
+        function init() {
+			canvas = document.getElementById("canvas");
+			stage = new Stage(canvas);
+			titleScreen();
+        }
+	
+	function handlePlayPress(){
+			stage = new Stage(canvas);
+
+			images = [];
+			conveyorMoving = true;
+			
+			/*
+			// Get the JSON Objects out of the json file.
+				$.getJSON('objects.json', function(data) {
+				  $.each(data, function(key, val) {
+					items.push(val);
+				  });
+				});
+				*/
+				
+				
+			SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
+		
+			if (!SoundJS.checkPlugin(true)) {
+				return;
+			}	
+			
+			
+			var assetsPath = "assets/";
+			manifest = [
+						{src:assetsPath+"BlackBall.png", id:"ball0"},
+						{src:assetsPath+"WhiteBall.png", id:"ball1"},
+						{src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg", id:"music"},
+						{src:assetsPath+"GU-StealDaisy.mp3|"+assetsPath+"GU-StealDaisy.ogg", id:"boink"}
+				]	
+		
+			
+			setGrids();
+			
+			stage.onMouseUp = handleMouseUp;
+			
+			loader = new PreloadJS();
+			loader.installPlugin(SoundJS);
+			loader.onFileLoad = handleFileLoad;
+			loader.onFileError = handleFileError;
+			loader.onComplete = handleComplete;
+			loader.onProgress = handleProgress;
+			loader.loadManifest(manifest);
+			//loader.loadFile(item, true);
+			
+			
+	}
+	
+	function titleScreen(){
+			var s = new Shape();
+			var g = s.graphics;
+			g.setStrokeStyle(10, 'round', 'round');
+			g.beginStroke(Graphics.getRGB(0, 0, 0));
+			g.beginFill(Graphics.getRGB(75, 75, 75));
+			g.rect(canvas.width * .3,canvas.height * .25,canvas.width*.4,canvas.height * .25);
+			g.endStroke();
+			g.endFill();
+
+			s.onPress = handlePlayPress;
+			stage.addChild(s);
+			stage.update();
+	
+	}
+	
+	function setGrids(){
+		grid1 = new Array();
+		grid2 = new Array();
+		
+		for(var i = 0; i < 3; i++){
+			grid1[i] = new Array();
+			grid2[i] = new Array();
+		}
+		
+		var grid1StartX = .03;
+		var grid2StartX = .23;
+		
+		var gridStartY = .655;
+		var rectWidth =  .05;
+		var rectHeight =  .08
+		for(var i = 0; i < 3; i++){
+			for(var j = 0; j<3; j++){
+				grid1[i][j] = new Rect(canvas.width * (grid1StartX + j*rectWidth), canvas.height * (gridStartY + rectHeight * i) ,rectWidth * canvas.width,rectHeight * canvas.height);
+			}
+		}
+		for(var i = 0; i < 3; i++){
+			for(var j = 0; j<3; j++){
+				grid2[i][j] = new Rect(canvas.width * (grid2StartX + j*rectWidth), canvas.height * (gridStartY + rectHeight * i) ,rectWidth* canvas.width ,rectHeight * canvas.height);
+			}
+		}
+		
+	}
+	
+	function drawLayout(){
+	    var s = new Shape();
+	    var g = s.graphics;
+
+	    //Conveyor
+	    g.setStrokeStyle(10, 'round', 'round');
+	    g.beginStroke(Graphics.getRGB(0, 0, 0));
+	    g.beginFill(Graphics.getRGB(75, 75, 75));
+	    g.rect(canvas.width * .6,canvas.height * .65,canvas.width,canvas.height * .25);
+		g.endStroke();
+	    g.endFill();
+	    
+	    //Scanner
+	    g.setStrokeStyle(10, 'round', 'round');
+	    g.beginStroke(Graphics.getRGB(0, 0, 0));
+	    g.beginFill(Graphics.getRGB(75, 75, 155));
+	    g.rect(canvas.width * .4,canvas.height * .65,canvas.width * .2,canvas.height * .25);
+		g.endStroke();
+	    g.endFill();
+	    
+	    //Bag Section
+	    g.setStrokeStyle(10, 'round', 'round');
+	    g.beginStroke(Graphics.getRGB(0, 0, 0));
+	    g.beginFill(Graphics.getRGB(125, 75, 125));
+	    //g.drawPolyStar(0, 0, 300, 4, 0, 45); //55,53
+	    g.rect(0,canvas.height * .65,canvas.width*.40,canvas.height * .25);
+		g.endStroke();
+	    g.endFill();
+	    
+		//Bag Grid 1
+		g.setStrokeStyle(2, 'round', 'round');
+	    g.beginStroke(Graphics.getRGB(0, 0, 0));
+	    g.beginFill(Graphics.getRGB(125, 75, 240));
+	    g.rect(canvas.width * .03 ,canvas.height * .655,canvas.width*.15,canvas.height * .24);
+		g.rect(canvas.width * .23 ,canvas.height * .655, canvas.width*.15 ,canvas.height * .24);
+		for(var i = 0; i < 3; i++){
+			for(var j = 0; j<3; j++){
+				g.rect(grid1[i][j].x, grid1[i][j].y, grid1[i][j].width, grid1[i][j].height);
+				g.rect(grid2[i][j].x, grid2[i][j].y, grid2[i][j].width, grid2[i][j].height);
+			}
+		}
+		
+		g.endStroke();
+	    g.endFill();
+		
+	    stage.addChild(s);
+	
+	}
+	
+	
+	function checkConveyor(){
+	
+		var blocked = false;
+		for(var i=0;i<items.length;i++) {
+				var ball = items[i];
+				if (ball == selectedItem){
+					break;
+				}
+				else if (ball.x < canvas.width * .60 + ball.radius 
+								&& ball.x > canvas.width* .60
+								&& ball.y < canvas.height * .9 
+								&& ball.y > canvas.height * .65){
+					blocked = true;
+					}
+
+			}
+		if (blocked == true) 
+			conveyorMoving = false;
+		else 
+			conveyorMoving = true;
+	
+	}
+	
+	
+	function handleItemMove(event){
+			selectedItem.x = event.stageX+offset.x;
+			selectedItem.y = event.stageY+offset.y;
+			
+			/*
+			conveyorMoving = true;
+			for(var i=0;i<items.length;i++) {
+				var ball = items[i];
+				if (ball.x < canvas.width * .60 + ball.radius 
+								&& ball.x > canvas.width* .60
+								&& ball.y < canvas.height * .9 
+								&& ball.y > canvas.height * .65){
+					conveyorMoving = false;
+					console.log("Stopping conveyor");
+					}
+
+			}
+			*/
+	}
+	
+	function handleMouseUp(){
+		if (selectedItem != null){
+			for(var i = 0; i < 3; i++){
+				for(var j = 0; j<3; j++){
+					if (selectedItem.x > grid1[i][j].x &&
+						selectedItem.y > grid1[i][j].y &&
+						selectedItem.x < grid1[i][j].x + grid1[i][j].width &&
+						selectedItem.y < grid1[i][j].y + grid1[i][j].height){
+							selectedItem.x = grid1[i][j].x + grid1[i][j].width/2;
+							selectedItem.y = grid1[i][j].y + grid1[i][j].height/2;
+						}
+					else if (selectedItem.x > grid2[i][j].x &&
+						selectedItem.y > grid2[i][j].y &&
+						selectedItem.x < grid2[i][j].x + grid2[i][j].width &&
+						selectedItem.y < grid2[i][j].y + grid2[i][j].height){
+							selectedItem.x = grid2[i][j].x + grid2[i][j].width/2;
+							selectedItem.y = grid2[i][j].y + grid2[i][j].height/2;
+						}
+				}
+			}
+			checkConveyor();
+			selectedItem = null;
+			
+		}
+		
+	
+	}
+	
+	function handleItemPress(event){
+		SoundJS.play("boink", SoundJS.INTERRUPT_ANY, 0 , 0 , 0 , 1 , 0 );
+		var ball = event.target;
+		selectedItem = ball;
+		checkConveyor();
+		offset = {x:ball.x-event.stageX, y:ball.y-event.stageY};
+		event.onMouseMove = handleItemMove;
+	    
+	}
+	
+	function handleItemMouseOver(){
+	    this.scale = .7;
+	    this.scaleX = this.scaleY = this.scale;
+	}
+	
+	function handleItemMouseOut(){
+	    this.scale = .5;
+	    this.scaleX = this.scaleY = this.scale;
+	}
+	
+	function addItem(){
+	    var ball = new Ball(loader.getResult(manifest[parseInt(Math.random()*2)].id));
+            ball.scale = .5;
+	    ball.scaleX = ball.scaleY = ball.scale;
+	    
+            ball.vx = Math.random()*25-15;
+            ball.vy = Math.random()*35-15;
+            ball.regX = ball.regY = 35;
+            ball.bounce = -0.7//-Math.random()*1-0.7;
+
+	    ball.onPress = handleItemPress;
+            ball.onMouseOver = handleItemMouseOver;
+            ball.onMouseOut = handleItemMouseOut;
+	    
+            ball.x = canvas.width+ball.radius*3*ball.scale;//Math.random()*canvas.width;
+	    ball.y = Math.random()*canvas.height * .25 + canvas.height * .65;
+	    ball.oldX = ball.oldY = 0;
+	    
+            items.push(ball);
+
+			
+            stage.addChild(ball);
+	
+	}
+	
+	function playSound(name, loop) {
+		// Play the sound using the ID created above.
+		return SoundJS.play(name);
+	}
+	
+	function handleComplete() {
+	
+	
+	    drawLayout();
+            items = [];
+		//	SoundJS.play("music", SoundJS.INTERRUPT_NONE, 0 , 0 , -1 , 1 , 0 );
+			playSound("music");
+			
+			//This adds the background
+          //  addBG(loader.getResult('bg').result);
+			
+	//This adds the initial balls.
+            for(var i=0;i<images.length;i++) {
+				addItem();
+            }
+	    
+            run();
+        }
+	
+	function handleFileLoad(event) {
+		if (event.id == "music"){
+			console.log("Loaded music!");
+			return;
+		}
+            images.push(event)
+		 console.log("Loaded a file");
+        }
+		
+	function handleFileError(event){
+		console.log("File Error!");
+	
+	}
+	
+	function handleProgress(event){
+	
+	}
+	
+	function run(){
+		
+		stage.enableMouseOver();
+		Ticker.addListener(window);
+		Ticker.setInterval(17);
+		stage.update();
+		
+	}
+	
+	function tick(){ 
+		var total = items.length;
+		if (Ticker.getTicks() % 100 == 0){
+			addItem();
+		}
+		
+		if (conveyorMoving){
+			for(var i=0;i<total;i++) {
+				var ball = items[i];
+				if (ball.x > canvas.width * .59 && ball.y < canvas.height * .9  && ball.y > canvas.height * .65 && ball != selectedItem)
+				ball.x = ball.x - 1;
+				/*if (ball.x < canvas.width * .60 + ball.radius 
+								&& ball.x > canvas.width* .60
+								&& ball.y < canvas.height * .9 
+								&& ball.y > canvas.height * .65){
+					conveyorMoving = false;
+					console.log("Stopping conveyor");
+					}
+					*/
+
+			}
+			checkConveyor();
+		}
+		stage.update(); 
+	}
+
+	
+
+    </script>
+</head>
+<body onload="init();">
+
+
+	<div class="canvasHolder">
+	    <canvas id="canvas" width="1280" height="768" style="border:5px solid #aaaaaa;"></canvas>
+	</div>
+
+</body>
+</html>
