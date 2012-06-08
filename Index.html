@@ -15,7 +15,7 @@
         var canvas;
         var stage;
         var img;
-		var items;
+		var items, itembuffer, numitems;
 		var images;
 		var manifest;
 		var conveyorMoving;
@@ -24,28 +24,43 @@
 		var loader;
 		var grid1;
 		var grid2;
-	
+		var score, scoretext;
         function init() {
 			canvas = document.getElementById("canvas");
 			stage = new Stage(canvas);
 			titleScreen();
         }
 	
+	function createItemPool(){
+		numitems = 0;
+		for (var i = 0; i < itembuffer.length; i++){
+			numitems += itembuffer[i].count;
+			
+		
+		}
+	
+	}
+	
+	
 	function handlePlayPress(){
-			stage = new Stage(canvas);
+			stage.removeAllChildren();
 
 			images = [];
 			conveyorMoving = true;
+			score = 0;
 			
-			/*
+			itembuffer = new Array();
 			// Get the JSON Objects out of the json file.
 				$.getJSON('objects.json', function(data) {
 				  $.each(data, function(key, val) {
-					items.push(val);
+					itembuffer.push(val);
 				  });
+					createItemPool();
 				});
-				*/
 				
+				
+			
+			
 				
 			SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
 		
@@ -169,9 +184,13 @@
 	    g.endFill();
 		
 	    stage.addChild(s);
+		
+		scoretext = new Text("Score: " + score, "36px Arial", "#777");
+		scoretext.x = canvas.width * .25;
+		scoretext.y = canvas.height * .1
+		stage.addChild(scoretext);
 	
 	}
-	
 	
 	function checkConveyor(){
 	
@@ -225,6 +244,7 @@
 						selectedItem.y > grid1[i][j].y &&
 						selectedItem.x < grid1[i][j].x + grid1[i][j].width &&
 						selectedItem.y < grid1[i][j].y + grid1[i][j].height){
+							score+= 100;
 							selectedItem.x = grid1[i][j].x + grid1[i][j].width/2;
 							selectedItem.y = grid1[i][j].y + grid1[i][j].height/2;
 						}
@@ -232,6 +252,7 @@
 						selectedItem.y > grid2[i][j].y &&
 						selectedItem.x < grid2[i][j].x + grid2[i][j].width &&
 						selectedItem.y < grid2[i][j].y + grid2[i][j].height){
+							score+= 100;
 							selectedItem.x = grid2[i][j].x + grid2[i][j].width/2;
 							selectedItem.y = grid2[i][j].y + grid2[i][j].height/2;
 						}
@@ -243,6 +264,10 @@
 		}
 		
 	
+	}
+	
+	function updateScore(){
+		scoretext.text = "Score: " + score;
 	}
 	
 	function handleItemPress(event){
@@ -297,7 +322,6 @@
 	
 	function handleComplete() {
 	
-	
 	    drawLayout();
             items = [];
 		//	SoundJS.play("music", SoundJS.INTERRUPT_NONE, 0 , 0 , -1 , 1 , 0 );
@@ -343,8 +367,11 @@
 	
 	function tick(){ 
 		var total = items.length;
-		if (Ticker.getTicks() % 100 == 0){
+		updateScore();
+		if (Ticker.getTicks() % 100 == 0 && numitems >= 0){
+			
 			addItem();
+			numitems--;
 		}
 		
 		if (conveyorMoving){
