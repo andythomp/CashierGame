@@ -1,0 +1,17 @@
+[
+  {
+    "name": "banana",
+    "image": "bananas.png",
+    "type": "produce",
+    "plu": 4011,
+    "blocks": 1
+  },
+  {
+    "name": "PRODUCT_NAME",
+    "image": "PRODUCT_NAME.png",
+    "type": "PRODUCE_OR_GROCERY",
+    "plu": "VALUE(0000 FOR GROCERY)",
+    "blocks": "NUMBER_OF_BLOCKS"
+  },
+  {}
+]
