@@ -1,17 +1,401 @@
 [
   {
-    "name": "banana",
-    "image": "bananas.png",
+    "name": "Acorn Squash",
+    "image": "PRODUCT_NAME.png",
     "type": "produce",
-    "plu": 4011,
-    "blocks": 1
+    "plu": 4750,
+    "blocktype": 1
   },
   {
-    "name": "PRODUCT_NAME",
+    "name": "Anise",
     "image": "PRODUCT_NAME.png",
-    "type": "PRODUCE_OR_GROCERY",
-    "plu": "VALUE(0000 FOR GROCERY)",
-    "blocks": "NUMBER_OF_BLOCKS"
+    "type": "produce",
+    "plu": 3338,
+    "blocktype": 1
   },
-  {}
+  {
+    "name": "Beefsteak Tomato",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 3061,
+    "blocktype": 1
+  },
+  {
+    "name": "Bi-Color Corn",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4590,
+    "blocktype": 1
+  },
+  {
+    "name": "Blood Orange",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4381,
+    "blocktype": 1
+  },
+  {
+    "name": "Bok Choy",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4545,
+    "blocktype": 1
+  },
+  {
+    "name": "Broccoli",
+    "image": "WhiteBall.png",
+    "type": "produce",
+    "plu": 4060,
+    "blocktype": 1
+  },
+  {
+    "name": "Brussels Sprouts",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4550,
+    "blocktype": 1
+  },
+  {
+    "name": "Bunch Carrots",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4094,
+    "blocktype": 1
+  },
+  {
+    "name": "Bunch Red Radish",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4089,
+    "blocktype": 1
+  },
+  {
+    "name": "Canary Melon",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4317,
+    "blocktype": 1
+  },
+  {
+    "name": "Champagne Grapes",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4271,
+    "blocktype": 1
+  },
+  {
+    "name": "Cherry",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4045,
+    "blocktype": 1
+  },
+  {
+    "name": "Eggplant",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4081,
+    "blocktype": 1
+  },
+  {
+    "name": "English Cucumber",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4593,
+    "blocktype": 1
+  },
+  {
+    "name": "Fiddleheads",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4606,
+    "blocktype": 1
+  },
+  {
+    "name": "Garlic",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 3401,
+    "blocktype": 1
+  },
+  {
+    "name": "Ginger Root",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4612,
+    "blocktype": 1
+  },
+  {
+    "name": "Green Beans",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4066,
+    "blocktype": 1
+  },
+  {
+    "name": "Green Cabbage",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4069,
+    "blocktype": 1
+  },
+  {
+    "name": "Habanero Pepper",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 3125,
+    "blocktype": 1
+  },
+  {
+    "name": "Kiwi",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4030,
+    "blocktype": 1
+  },
+  {
+    "name": "Large Cantaloupe",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4050,
+    "blocktype": 1
+  },
+  {
+    "name": "Large Cauliflower",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4572,
+    "blocktype": 1
+  },
+  {
+    "name": "Large Lemons",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4053,
+    "blocktype": 1
+  },
+  {
+    "name": "Large Pineapple",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4430,
+    "blocktype": 1
+  },
+  {
+    "name": "Large Red Mango",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4959,
+    "blocktype": 1
+  },
+  {
+    "name": "Leek",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4629,
+    "blocktype": 1
+  },
+  {
+    "name": "Lime",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4048,
+    "blocktype": 1
+  },
+  {
+    "name": "Mangosteen",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 3042,
+    "blocktype": 1
+  },
+  {
+    "name": "Nectarine",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 3369,
+    "blocktype": 1
+  },
+  {
+    "name": "Orange Bell Pepper",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 3121,
+    "blocktype": 1
+  },
+  {
+    "name": "Prickly Pear",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4255,
+    "blocktype": 1
+  },
+  {
+    "name": "Pumpkin",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4735,
+    "blocktype": 1
+  },
+  {
+    "name": "Red Bell Pepper",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4688,
+    "blocktype": 1
+  },
+  {
+    "name": "Red Cabbage",
+    "image": "BlackBall.png",
+    "type": "produce",
+    "plu": 4554,
+    "blocktype": 1
+  },
+  {
+    "name": "Red Leaf Lettuce",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4075,
+    "blocktype": 1
+  },
+  {
+    "name": "Red Onion",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4082,
+    "blocktype": 1
+  },
+  {
+    "name": "Red Pitahaya",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 3040,
+    "blocktype": 1
+  },
+  {
+    "name": "Red Potato",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4073,
+    "blocktype": 1
+  },
+  {
+    "name": "Romaine Lettuce",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 3097,
+    "blocktype": 1
+  },
+  {
+    "name": "Santa Claus Melon",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4336,
+    "blocktype": 1
+  },
+  {
+    "name": "Starfruit",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4256,
+    "blocktype": 1
+  },
+  {
+    "name": "Tangerine",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4055,
+    "blocktype": 1
+  },
+  {
+    "name": "Turnip",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4747,
+    "blocktype": 1
+  },
+  {
+    "name": "White Eggplant",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4062,
+    "blocktype": 1
+  },
+  {
+    "name": "White Onion",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4663,
+    "blocktype": 1
+  },
+  {
+    "name": "White Potato",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4083,
+    "blocktype": 1
+  },
+  {
+    "name": "Yellow Banana",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4011,
+    "blocktype": 1
+  },
+  {
+    "name": "Yellow Beans",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4533,
+    "blocktype": 1
+  },
+  {
+    "name": "Yellow Bell Pepper",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4689,
+    "blocktype": 1
+  },
+  {
+    "name": "Yellow Corn",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4078,
+    "blocktype": 1
+  },
+  {
+    "name": "Yellow Mango",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4312,
+    "blocktype": 1
+  },
+  {
+    "name": "Yellow Potato",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4727,
+    "blocktype": 1
+  },
+  {
+    "name": "Yelow Zucchini",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4086,
+    "blocktype": 1
+  },
+  {
+    "name": "Zucchini",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": 4067,
+    "blocktype": 1
+  },
+  {
+    "name": "",
+    "image": "PRODUCT_NAME.png",
+    "type": "produce",
+    "plu": "",
+    "blocktype": 1
+  }
 ]

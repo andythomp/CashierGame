@@ -8,178 +8,307 @@
 	<script language="javascript"  src="SoundJS.js"></script>
 	<script language="javascript"  src="preload.js"></script>
 	<script language="javascript"  src="FlashPlugin.js"></script>
+	<script language="javascript"  src="layout.js"></script>
+	<script language="javascript"  src="ColorMatrixFilter.js"></script>
 	<script language="javascript"  src="Item.js"></script>
 	<script language="javascript"  src="BagSlot.js"></script>
-	<script language="javascript"  src="layout.js"></script>
 	<script type="text/javascript">
 
 	
 	
 	
-		//Variables
-        var canvas;
-        var stage;
-        var img;
-		var items, itembuffer, numitems, itemlibrary;
-		var images;
-		var manifest;
-		var conveyorMoving;
-		var selectedItem;
-		var offset;
-		var loader;
-		var grid1;
-		var grid2;
-		var score, scoretext;
-		
-		
+	/*-----------------------------------------------------------------------------*/	
+	/*-------------------------------VARIABLES-------------------------------------*/	
+	/*-----------------------------------------------------------------------------*/	
+	
+	var assetspath;
+	var canvas;
+	var stage;
+	var img;
+	var items, item_buffer, numitems, item_library, level_library;
+	var images;
+	var manifest;
+	var conveyorMoving;
+	var selectedItem, scanner_item;
+	var offset;
+	var loader;
+	var grid1;
+	var grid2;
+	var score, scoretext;
+	var pluInput, pluInputText;
+	var rollodex_text;
+	var spawnCounter
+	var load_percent;
+	var current_mode;
+	var music_enabled;
+	var selected_level;
+	
+	/*-----------------------------------------------------------------------------*/	
+	/*-----------------------INITIALIZATION FUNCTIONS------------------------------*/	
+	/*-----------------------------------------------------------------------------*/	
     function init() {
 			canvas = document.getElementById("canvas");
 			stage = new Stage(canvas);
 			initConstants();
-			titleScreen();
+			load_percent = 0;
+			assetspath = "assets/";	
+			items = new Array();
+			current_mode = MENU_MODE;
+			music_enabled = false;
+			stage.onMouseUp = handleMouseUp;
+			stage.enableMouseOver();
+			document.onkeydown = handleKeyDown; // IE, Firefox, Safari
+			
+			conveyorMoving = false;
+			Ticker.addListener(window);
+			Ticker.setInterval(17);
+			importItemLibrary();
+			loadingScreen(0);
+			//titleScreen();
+			
     }
-		
-		
-	
-	
-	function createItemPool(){
-		numitems = 0;
-		for (var i = 0; i < itembuffer.length; i++){
-			numitems += itembuffer[i].count;
-		}
-	}
-	
 	
 	function importItemLibrary(){
-		itemlibrary = new Array();
+		item_library = new Array();
 		$.getJSON('itemlibrary.json', function(data) {
 			$.each(data, function(key, val) {
-				itemlibrary.push(val);
+				item_library.push(val);
 			});
-					
+			load_percent+=25;
+			loadingScreen(load_percent);
+			importLevels();
 		});
 	}
 	
-	function handlePlayPress(){
-			stage.removeAllChildren();
-
-			images = [];
-			conveyorMoving = true;
-			score = 0;
-			
-			itembuffer = new Array();
-			// Get the JSON Objects out of the json file.
-				$.getJSON('levels.json', function(data) {
-				  $.each(data, function(key, val) {
-					itembuffer.push(val);
-				  });
-				  createItemPool();
-				});
-			
-			itemlibrary = new Array();
-				$.getJSON('itemlibrary.json', function(data) {
-				  $.each(data, function(key, val) {
-					itemlibrary.push(val);
-				  });
-				  //Executed once library is full
-					
-				});
-			
-			
-				
-			SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
+	function importLevels(){
+		level_library = new Array();
+		$.getJSON('levels.json', function(data) {
+			$.each(data, function(key, val) {
+				level_library.push(val);
+			});
+			load_percent+=25;
+			loadingScreen(load_percent);
+			loadAssets();
+		});
+	
+	}
+	
+	function initSound(){
+		SoundJS.FlashPlugin.BASE_PATH = assetspath // Initialize the base path from this document to the Flash Plugin
 		
 			if (!SoundJS.checkPlugin(true)) {
 				return;
 			}	
-			
-			
-			var assetsPath = "assets/";
-			manifest = [
+	}
+	
+	function createManifest(){
+		manifest = new Array();
+		for (var i = 0; i < item_library.length; i++){
+			var item = {src:assetspath+item_library[i].image, id:item_library[i].name};
+			manifest.push(item);
+		}
+		
+		manifest.push({src:assetspath+"18-machinae_supremacy-lord_krutors_dominion.mp3", id:"music"});
+		manifest.push({src:assetspath+"GU-StealDaisy.mp3", id:"boink"});
+		
+		
+/*
+		manifest = [
 						{src:assetsPath+"BlackBall.png", id:"ball0"},
 						{src:assetsPath+"WhiteBall.png", id:"ball1"},
 						{src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg", id:"music"},
 						{src:assetsPath+"GU-StealDaisy.mp3|"+assetsPath+"GU-StealDaisy.ogg", id:"boink"}
-				]	
-		
-			
-			setGrids();
-			
-			stage.onMouseUp = handleMouseUp;
-			
-			loader = new PreloadJS();
-			loader.installPlugin(SoundJS);
-			loader.onFileLoad = handleFileLoad;
-			loader.onFileError = handleFileError;
-			loader.onComplete = handleComplete;
-			loader.onProgress = handleProgress;
-			loader.loadManifest(manifest);
-			//loader.loadFile(item, true);
-			
-			
+				]
+				*/
 	}
 	
 	
+	function loadAssets(){
+		loader = new PreloadJS();
+		initSound();
+		loader.installPlugin(SoundJS);
+		loader.onFileLoad = handleFileLoad;
+		loader.onFileError = handleFileError;
+		loader.onComplete = handleComplete;
+		loader.onProgress = handleProgress;
+		createManifest();
+		images = new Array();
+		loader.loadManifest(manifest);
+		//loader.loadFile(item, true);
 	
+	}
 	
-	function checkConveyor(){
-	
-		var blocked = false;
-		for(var i=0;i<items.length;i++) {
-				var item = items[i];
-				if (item === selectedItem){
-					
-				}
-				else if (item.x < canvas.width * .60 + item.radius 
-								&& item.x > canvas.width* .60
-								&& item.y < canvas.height * .9 
-								&& item.y > canvas.height * .65){
-					blocked = true;
-					}
 
-			}
-		if (blocked == true) 
-			conveyorMoving = false;
-		else 
-			conveyorMoving = true;
 	
-	}
-	
-	
-	function handleItemMove(event){
-			selectedItem.x = event.stageX+offset.x;
-			selectedItem.y = event.stageY+offset.y;
-			if (selectedItem.x > SCANNER_X && selectedItem.x < SCANNER_X + SCANNER_WIDTH &&
-				selectedItem.y > SCANNER_Y && selectedItem.y < SCANNER_Y + SCANNER_HEIGHT){
-				console.log("Item Scanned!");
-				selectedItem.changeState(loader.getResult(manifest[1].id));
-				//selectedItem.source =  loader.getResult(manifest[1].id);
-			}
-	}
-	
-	function checkBagCollisions(item){
-		for(var i = 0; i < 3; i++){
-				for(var j = 0; j<3; j++){
-					if (item.x > grid1[i][j].x &&
-						item.y > grid1[i][j].y &&
-						item.x < grid1[i][j].x + grid1[i][j].width &&
-						item.y < grid1[i][j].y + grid1[i][j].height){
-							score+= 100;
-							item.x = grid1[i][j].x + grid1[i][j].width/2;
-							item.y = grid1[i][j].y + grid1[i][j].height/2;
-						}
-					else if (item.x > grid2[i][j].x &&
-						item.y > grid2[i][j].y &&
-						item.x < grid2[i][j].x + grid2[i][j].width &&
-						item.y < grid2[i][j].y + grid2[i][j].height){
-							score+= 100;
-							item.x = grid2[i][j].x + grid2[i][j].width/2;
-							item.y = grid2[i][j].y + grid2[i][j].height/2;
-						}
+	function loadLevel(levelcode){
+
+		//Clear all old data
+		stage.removeAllChildren();
+		pluInput = "";
+		spawnCounter = 0;
+		items = [];
+		item_buffer = [];
+		conveyorMoving = true;
+		score = 0;
+		
+		//Grab the level
+		selected_level = level_library[levelcode];
+		
+		for (var i = 0; i < selected_level.items.length; i++){
+			var plu;
+			var type;
+			var blocktype;
+			for (var j = 0; j <item_library.length; j++){
+				if (selected_level.items[i].name == item_library[j].name){
+					plu = item_library[j].plu;
+					blocktype = item_library[j].blocktype;
+					type = item_library[j].type;
 				}
 			}
+			addItemsToBuffer(selected_level.items[i].name, selected_level.items[i].count, plu, type, blocktype);
+		}
+		
+		drawLayout();
+		
+		if (music_enabled)
+			playSound("music");
+		
+		
+		
+		current_mode = STAGE_MODE;
+	}
 	
 	
+	
+	function playSound(name, loop) {
+		//Play the sound using the ID created above.
+		return SoundJS.play(name);
+	}
+	
+	function handleComplete() {
+		titleScreen();
+    }
+	
+	function handleFileLoad(event) {
+		if (event.id == "music"){
+			return;
+		}	
+//			console.log(event);
+            images.push(event)
+    }
+		
+	function handleFileError(event){
+		console.log("File Error!");
+	}
+	
+	function handleProgress(event){
+	//Every time a file is loaded, handleProgress is called.
+	//If my file has an initial count of how many items are in it, I could create a smooth
+	//Loading bar for every item that gets loaded...that's pretty cool, come back to this later.
+	//	console.log("Progress was made...");
+		/*CAN BE USED LATER*/
+		if (load_percent <100)
+			load_percent+= 1;
+		loadingScreen(load_percent);
+	}
+	
+	/*-----------------------------------------------------------------------------*/
+	/*-----------------------------MENU BUTTONS------------------------------------*/	
+	/*-----------------------------------------------------------------------------*/
+	
+	function handlePlayPress(){
+		loadLevel(0);
+	}
+	
+	
+	function handleOptionsPress(){
+		optionMenu();
+	}
+	
+	function handleBackPress(){
+		titleScreen();
+	}
+	
+	function handleLevelPress(){
+		levelSelectScreen();
+	}
+	/*-----------------------------------------------------------------------------*/
+	/*--------------------------------LOADING FUNCTIONS---------------------*/
+	/*-----------------------------------------------------------------------------*/
+	
+	
+	
+	/*-----------------------------------------------------------------------------*/
+	/*--------------------------------KEYBOARD/MOUSE FUNCTIONS---------------------*/
+	/*-----------------------------------------------------------------------------*/
+	
+	
+	function handleKeyDown(event){
+		var keynum;
+		var keychar;
+		var numcheck;
+		
+		
+		if (event.which){
+			keynum = event.which;
+		}
+		if (keynum == 13){ // ASCII for Return
+			if (scanner_item != null){
+				if (scanner_item.plu == parseInt(pluInput)){
+					//Entered the right PLU
+					scanItem(scanner_item);
+					rollodex_text.text = "";
+				}
+				else{
+					console.log("Incorrect PLU entered");
+				}
+			}
+			else{
+				console.log("No item to weigh.");
+			}
+		
+			pluInput = "";
+		}
+		else if(keynum == 8){
+			pluInput = pluInput.substr(0, pluInput.length-1)
+			return false;
+		}
+			
+		keychar = String.fromCharCode(keynum);
+		numcheck = /\d/;
+		if (numcheck.test(keychar)){
+				pluInput = pluInput + keychar;
+			if (pluInput.length > 4)
+				pluInput = pluInput.substr(1, 4)
+			
+		}
+	}
+	
+	function handleItemMouseOver(){
+	//Highlights the Item
+		this.highlight();
+	}
+	
+	function handleItemMouseOut(){
+	//Bring the item back to normal
+	    this.unhighlight();
+	}
+	
+	function handleItemPress(event){
+		var item = event.target;
+		console.log(item);
+		console.log(scanner_item);
+		if (item.locked || scanner_item == item){
+			return;
+		}
+		else{
+			SoundJS.play("boink", SoundJS.INTERRUPT_ANY, 0 , 0 , 0 , 1 , 0 );
+			selectedItem = item;
+			item.oldx = item.x;
+			item.oldy = item.y;
+			offset = {x:item.x-event.stageX, y:item.y-event.stageY};
+			event.onMouseMove = handleItemMove;
+		} 
 	}
 	
 	function handleMouseUp(){
@@ -187,17 +316,22 @@
 			//Check to make sure its not just being moved on the conveyor belt
 			
 			//See if its in the bounds of bag 1
-			if (selectedItem.x > BAG_1_X && selectedItem.x < BAG_1_X + BAG_WIDTH){
+			if (onBag1Area(selectedItem) && selectedItem.state == BLOCK_STATE){
 				console.log("Between bag 1");
 				checkBagCollisions(selectedItem);
+				snapItemToColumn(selectedItem);
 			}
 			//See if its in the bounds of bag 2
-			else if (selectedItem.x > BAG_2_X && selectedItem.x < BAG_2_X + BAG_WIDTH){
-				console.log("Between bag 2");
+			else if (onBag2Area(selectedItem) && selectedItem.state == BLOCK_STATE){
 				checkBagCollisions(selectedItem);
+				snapItemToColumn(selectedItem);
 			} 
-			else if (selectedItem.x > CONVEYOR_X && selectedItem.y > CONVEYOR_Y && selectedItem.x < CONVEYOR_X+CONVEYOR_WIDTH && selectedItem.y < CONVEYOR_Y+CONVEYOR_HEIGHT){
-				console.log("Item is on the conveyor belt");
+			else if (onConveyorBelt(selectedItem)  && selectedItem.state == ITEM_STATE){
+
+			}
+			else if (onScanner(selectedItem) && scanner_item == null && selectedItem.state == ITEM_STATE){
+				scanner_item = selectedItem;
+				updateRollodex();
 			}
 			else{
 				selectedItem.x = selectedItem.oldx;
@@ -209,149 +343,346 @@
 		
 	
 	}
-	
-	
-	
-	function handleItemPress(event){
-		//Play a sound
-		SoundJS.play("boink", SoundJS.INTERRUPT_ANY, 0 , 0 , 0 , 1 , 0 );
-		var item = event.target;
-		selectedItem = item;
-		item.oldx = item.x;
-		item.oldy = item.y;
-		offset = {x:item.x-event.stageX, y:item.y-event.stageY};
-		event.onMouseMove = handleItemMove;
-	    
-	}
-	
-	function handleItemMouseOver(){
-	//Make the item look larger
-	    this.scale = .7;
-	    this.scaleX = this.scaleY = this.scale;
-	}
-	
-	function handleItemMouseOut(){
-	//Bring the item back to normal
-	    this.scale = .5;
-	    this.scaleX = this.scaleY = this.scale;
-	}
-	
-	function addItem(){
-	   // var item = new Item(loader.getResult(manifest[parseInt(Math.random()*2)].id));
-	   var item = new Item(loader.getResult(manifest[0].id));
-        item.scale = .5;
-		item.scaleX = item.scaleY = item.scale;
-	    
-		item.vx = Math.random()*25-15;
-		item.vy = Math.random()*35-15;
-		item.regX = item.regY = 35;
-		item.bounce = -0.7//-Math.random()*1-0.7;
 
-		item.onPress = handleItemPress;
-		item.onMouseOver = handleItemMouseOver;
-		item.onMouseOut = handleItemMouseOut;
-
-		item.x = canvas.width+item.radius*3*item.scale - 200;//Math.random()*canvas.width;
-	    item.y = Math.random()*canvas.height * .25 + canvas.height * .65;
-	    item.oldX = item.oldY = 0;
-	
-		items.push(item);
-
-		
-		stage.addChild(item);
-
-	}
-	
-	function playSound(name, loop) {
-		// Play the sound using the ID created above.
-		return SoundJS.play(name);
-	}
-	
-	function handleComplete() {
-	
-	    drawLayout();
-            items = [];
-		//	SoundJS.play("music", SoundJS.INTERRUPT_NONE, 0 , 0 , -1 , 1 , 0 );
-			playSound("music");
+    function handleItemMove(event){
+			if (selectedItem != null){
+				selectedItem.x = event.stageX+offset.x;
+				selectedItem.y = event.stageY+offset.y;
+			/*
+				if (onScanner(selectedItem) && selectedItem.grocery){
+					offset.x = selectedItem.width / 2 * selectedItem.scale;
+					offset.y = selectedItem.height / 2 * selectedItem.scale;
+					selectedItem.oldx = selectedItem.x;
+					selectedItem.oldy = selectedItem.y;
+					selectedItem.changeState();
+					//selectedItem.source =  loader.getResult(manifest[1].id);
+				}
+				else if(onScanner(selectedItem) && !selectedItem.grocery){
+					if (scanner_item == null){
+						scanner_item = selectedItem;
+						selectedItem = null;
+					}
+					else{
+						selectedItem.x = selectedItem.oldx;
+						selectedItem.y = selectedItem.oldy;
+					}
+					
+				}*/
+			}
 			
-			//This adds the background
-          //  addBG(loader.getResult('bg').result);
-			
-	//This adds the initial balls.
-            for(var i=0;i<images.length;i++) {
-				addItem();
-            }
-	    
-            run();
-        }
+	}	
 	
-	function handleFileLoad(event) {
-		if (event.id == "music"){
-			console.log("Loaded music!");
-			return;
+	/*---------------------------------------------------------------------------------------------------*/
+	/*------------------------------------------BOOLEAN FUNCTIONS----------------------------------------*/
+	/*---------------------------------------------------------------------------------------------------*/
+	//Checks if the conveyor is blocked
+	function checkConveyor(){
+		var blocked = false;
+		for(var i=0;i<items.length;i++) {
+				var item = items[i];
+				if (item === selectedItem){
+				}
+				else if (item.x < canvas.width * .60 + item.radius 
+								&& item.x > canvas.width* .60
+								&& item.y < canvas.height * .9 
+								&& item.y > canvas.height * .65){
+					blocked = true;
+					}
+			}
+		if (blocked == true) 
+			conveyorMoving = false;
+		else 
+			conveyorMoving = true;
+	}
+	
+	//Checks if an item is on the conveyor belt
+	function onConveyorBelt(item){
+		if (item.x > canvas.width * .59 && item.y < canvas.height * .9  && item.y > canvas.height * .65){
+			return true;
 		}
-            images.push(event)
-		 console.log("Loaded a file");
-        }
+		else
+			return false;
+	}
+	
+	//Checks if an item is on bag 1
+	function onBag1Area(item){
+		if (item.x - item.width/2 * item.scale > BAG_1_X &&
+			item.x - item.width/2 * item.scale  < BAG_1_X + BAG_WIDTH){
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	//Checks if an item is on bag 2
+	function onBag2Area(item){
+		if (item.x - item.width/2 * item.scale  > BAG_2_X &&
+			item.x - item.width/2 * item.scale  < BAG_2_X + BAG_WIDTH){
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	//Checks if an item is on the scanner
+	function onScanner(item){
+		if (item.x > SCANNER_X && item.x < SCANNER_X+SCANNER_WIDTH &&
+			item.y > SCANNER_Y && item.y < SCANNER_Y+SCANNER_HEIGHT){
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	
+	/*-----------------------------------------------------------------------------*/
+	/*---------------------ITEM MOVEMENT FUNCTIONS---------------------------------*/
+	/*-----------------------------------------------------------------------------*/
+	
+	
+	function snapItemToColumn(item){
+		var centerx = item.x - item.width/2 * item.scale;
+		for(var i = 0; i < 3; i++){
+			if (centerx > grid1[0][i].x && centerx < grid1[0][i].x + grid1[0][i].width){
+				var grid1centerx = grid1[0][i].x + grid1[0][i].width/2;
+				var deltax = centerx - grid1centerx;
+				item.x = item.x - deltax;
+			}
+			else if (centerx > grid2[0][i].x && centerx < grid2[0][i].x + grid2[0][i].width){
+				var grid2centerx = grid2[0][i].x + grid2[0][i].width/2;
+				var deltax = centerx - grid2centerx;
+				item.x = item.x - deltax;
+			
+			}
+		}
 		
-	function handleFileError(event){
-		console.log("File Error!");
+	}
+	
+	function snapItemToRow(item){
+		var centerx = item.x - item.width/2 * item.scale;
+		var centery = item.y - item.height/2 * item.scale;
+		var column = new Array()
+		//First index for bag, seond for which column
+		for(var i = 0; i < 3; i++){
+			if (centerx > grid1[0][i].x && centerx < grid1[0][i].x + grid1[0][i].width){
+				column[0] = 0;
+				column[1] = i;
+			}
+			else if (centerx > grid2[0][i].x && centerx < grid2[0][i].x + grid2[0][i].width){
+				column[0] = 1;
+				column[1] = i;
+			}
+		}
+		
+		for(var i = 0; i < 3; i++){
+			//Grid 1
+			if(column[0] == 0){
+				if (centery > grid1[i][column[1]].y && centery < grid1[i][column[1]].y + grid1[i][column[1]].height){
+					if (i != 2){
+						if (grid1[i+1][column[1]].containsItem()){
+							var grid1centery = grid1[i][column[1]].y + grid1[i][column[1]].height/2;
+							var deltay = centery - grid1centery;
+							item.y = item.y - deltay;
+							item.locked = true;
+							items.splice(items.indexOf(item), 1);
+							grid1[i][column[1]].item = item;
+						}
+					}
+					else{
+						var grid1centery = grid1[i][column[1]].y + grid1[i][column[1]].height/2;
+						var deltay = centery - grid1centery;
+						item.y = item.y - deltay;
+						item.locked = true;
+						items.splice(items.indexOf(item), 1);
+						grid1[i][column[1]].item = item;
+					}
+				}
+			}
+			//Grid 2
+			else if (column[0] == 1){
+				if (centery > grid2[i][column[1]].y && centery < grid2[i][column[1]].y + grid2[i][column[1]].height){
+					if (i != 2){
+						if (grid2[i+1][column[1]].containsItem()){
+							var grid2centery = grid2[i][column[1]].y + grid2[i][column[1]].height/2;
+							var deltay = centery - grid2centery;
+							item.y = item.y - deltay;
+							item.locked = true;
+							items.splice(items.indexOf(item), 1);
+							grid2[i][column[1]].item = item;
+						}
+					}
+					else {
+						var grid2centery = grid2[i][column[1]].y + grid2[i][column[1]].height/2;
+						var deltay = centery - grid2centery;
+						item.y = item.y - deltay;
+						item.locked = true;
+						items.splice(items.indexOf(item), 1);
+						grid2[i][column[1]].item = item;
+					}
+				}
+			}
+		}
+		
+	}
+	
+	
+	function checkBagCollisions(item){
+		var centerx = item.x - item.width/2 * item.scale;
+		var centery = item.y - item.height/2 * item.scale;
+		for(var i = 0; i < 3; i++){
+				for(var j = 0; j<3; j++){
+				//Grid 1
+					if (centerx > grid1[i][j].x &&
+						centery > grid1[i][j].y &&
+						centerx < grid1[i][j].x + grid1[i][j].width &&
+						centery < grid1[i][j].y + grid1[i][j].height){
+							grid1[i][j].highlight();
+						//	score+= 100;
+						//	centerx = grid1[i][j].x + grid1[i][j].width/2;
+						//	centery = grid1[i][j].y + grid1[i][j].height/2;
+						}
+					//Grid 2
+					else if (centerx > grid2[i][j].x &&
+							 centery > grid2[i][j].y &&
+							 centerx < grid2[i][j].x + grid2[i][j].width &&
+							 centery < grid2[i][j].y + grid2[i][j].height){
+								grid2[i][j].highlight();
+						//	score+= 100;
+						//	centerx = grid2[i][j].x + grid2[i][j].width/2;
+						//	centery = grid2[i][j].y + grid2[i][j].height/2;
+						}
+				}
+			}
+			//return null;
+	
 	
 	}
 	
-	function handleProgress(event){
-	
-	}
-	
-	function run(){
-		
-		stage.enableMouseOver();
-		Ticker.addListener(window);
-		Ticker.setInterval(17);
-		stage.update();
-		
-	}
-	
-	function moveConveyorBelt(){
+	/*This function moves the items according to their respective areas*/
+	function moveItems(){
 		var total = items.length;
 		for(var i=0;i<total;i++) {
 			var item = items[i];
-			if (item.x > canvas.width * .59 && item.y < canvas.height * .9  && item.y > canvas.height * .65 && item !== selectedItem){
+			//Conveyor Belt
+			if (item === selectedItem){
+				
+			}
+			else if (onConveyorBelt(item)){
 				if (conveyorMoving){
 					item.x = item.x - 1;
 				}
 			}
-			else if(item.y < BAG_SECTION_Y+BAG_HEIGHT && item != selectedItem){
-				item.y = item.y +1
+			//Bag Slots
+			else if((onBag1Area(item) || onBag2Area(item)) && item.y < (BAG_Y + BAG_HEIGHT)){
+				snapItemToRow(item);
+				if (!item.locked)
+					item.y = item.y + 1;
+					
+			}
+			//Scanner area
+			else if(onScanner(item)){
+			
+			}
+		}
+	}
+	
+	/*-------------------------------------------------------------------------------------------*/
+	/*-------------------------------------------------------------------------------------------*/
+	/*-------------------------------------------------------------------------------------------*/
+	
+
+	
+	
+	function scanItem(item){
+		if (scanner_item == item){
+			scanner_item = null;
+		}
+		item.changeState();
+	}
+	function addItemToStage(){
+		var item_num = Math.floor(Math.random()*item_buffer.length);
+		items.push(item_buffer[item_num]);
+		stage.addChild(item_buffer[item_num]);
+		item_buffer.splice(item_num,1);
+	
+	}
+	
+	function addItemsToBuffer(name, count, plu, type, blocktype){
+		for (var i = 0; i < count; i++){
+			var item = new Item(loader.getResult(name), name, plu, type, blocktype);
+			item.scale = .6;
+			item.scaleX = item.scaleY = item.scale;
+			
+			item.vx = Math.random()*25-15;
+			item.vy = Math.random()*35-15;
+			item.regX = item.regY = 35;
+			item.bounce = -0.7//-Math.random()*1-0.7;
+
+			item.onPress = handleItemPress;
+			item.onMouseOver = handleItemMouseOver;
+			item.onMouseOut = handleItemMouseOut;
+
+			item.x = canvas.width+item.radius*3*item.scale;//Math.random()*canvas.width;
+			item.y = Math.random()*canvas.height * .25 + canvas.height * .65;
+			item.oldX = item.oldY = 0;
+		
+			item_buffer.push(item);
+		}
+	}
+	
+	function unhighlightBags(){
+		for(var i = 0; i < 3; i++){
+			for(var j = 0; j<3; j++){
+				grid1[i][j].unhighlight();
+				grid2[i][j].unhighlight();
+			}
+		}
+	}
+	
+	/*This function handles all the frames. When tick is called, the stage is updated based on what
+	it contains.*/
+	function tick(){ 
+		if(current_mode == STAGE_MODE){
+			//Get the total number of items off the board.
+			var total = items.length;
+			//Items only spawn or get closer to spawning if the conveyor is moving.
+			if (conveyorMoving){
+				spawnCounter++;
+			}
+			//Add Items every 100 ticks in which the conveyor is moving
+			if (spawnCounter % 100 == 0 && item_buffer.length > 0){
+				addItemToStage();
+			}
+			unhighlightBags();
+			for (var i = 0; i < items.length; i++){
+				checkBagCollisions(items[i]);
+			
 			}
 			
+			moveItems(); //Move all the items
+			checkConveyor(); //See if the conveyor is blocked
+			updateText(); //Update your score
+			stage.update(); //Update the stage
+		}
+		else if (current_mode == BOSS_MODE){
+		
+		}
+		else if (current_mode == MENU_MODE){
+		
+		}
+		else{
+			alert("Error: Current mode improperly defined!");
 		}
 	}
 	
-	function tick(){ 
-		var total = items.length;
-		
-		
-		//Add Items every 100 ticks
-		if (Ticker.getTicks() % 100 == 0 && numitems >= 0){
-			addItem();
-			numitems--;
-		}
-		
-		
-		moveConveyorBelt();
-		checkConveyor();
-		updateScore();
-		stage.update(); 
-	}
-
+	/*-------------------------------------------------------------------------------------------*/
+	/*-------------------------------------------------------------------------------------------*/
+	/*-------------------------------------------------------------------------------------------*/
 	
-
     </script>
 </head>
+
 <body onload="init();">
-
-
 	<div class="canvasHolder">
 	  <!---  <canvas id="canvas" width="1280" height="768" style="border:5px solid #aaaaaa;"></canvas>-->
 	 <canvas id="canvas" width="1280" height="768" style="border:5px solid #aaaaaa;"></canvas>

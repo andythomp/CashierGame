@@ -1,10 +1,17 @@
 [
   {
-    "type": "square",
-    "count": 5
-  },
-  {
-    "type": "circle",
-    "count": 6
+    "level": 1,
+    "stage": 1,
+    "boss": false,
+    "items": [
+      {
+        "name": "Broccoli",
+        "count": 6
+      },
+      {
+        "name": "Red Cabbage",
+        "count": 4
+      }
+    ]
   }
 ]
